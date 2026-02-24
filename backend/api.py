@@ -1,31 +1,52 @@
+import os
 from fastapi import FastAPI
+from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel 
-from rag import interroger_base
-from ner import analyser_texte_cyber
+from rag import interroger_base, DOSSIER_STOCKAGE
+from llama_index.core import StorageContext, load_index_from_storage
 
-app = FastAPI(title="Bridge Veille Pro")
+app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # Si j'oublie de restreindre je suis débile, mais pour le dev c'est plus simple
+    allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-class QueryRequest(BaseModel):
+class Query(BaseModel):
     prompt: str
 
 @app.post("/ask")
-async def ask_bot(request: QueryRequest):
-    # 1. Recherche dans la base LlamaIndex
-    connaissance = interroger_base(request.prompt)
+async def ask_bot(query: Query):
+    reponse = interroger_base(query.prompt)
+    # pour simplifier, renvoie une structure vide pour le NER dans cette route
+    return {"status": "success", "answer": reponse, "entities_detected": ""}
+
+@app.get("/articles")
+async def get_articles():
+    """Récupère tous les articles stockés dans l'index."""
+    if not os.path.exists(DOSSIER_STOCKAGE):
+        return []
     
-    # 2. Analyse des entités présentes dans la réponse
-    entites = analyser_texte_cyber(connaissance)
+    storage_context = StorageContext.from_defaults(persist_dir=DOSSIER_STOCKAGE)
+    index = load_index_from_storage(storage_context)
     
-    return {
-        "status": "success",
-        "answer": connaissance,
-        "entities_detected": entites
-    }
+    # récupere tous les documents du dictionnaire de l'index
+    ref_doc_info = index.storage_context.docstore.docs
+    
+    articles_list = []
+    for doc_id, node in ref_doc_info.items():
+        articles_list.append({
+            "id": doc_id,
+            "titre": node.metadata.get("titre", "Sans titre"),
+            "date": node.metadata.get("date", "Date inconnue"),
+            "source": node.metadata.get("source", "Inconnue"),
+            "url": node.metadata.get("url", "#"),
+            "contenu": node.text,
+            "resume": node.text[:200] + "..." # resume court pour la liste
+        })
+    
+    # Tri par date 
+    articles_list.sort(key=lambda x: x['date'], reverse=True)
+    return articles_list

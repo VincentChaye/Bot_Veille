@@ -20,7 +20,6 @@ class CollecteurVeilleMaster:
     def scraper_contenu_integral(self, url):
         try:
             response = requests.get(url, headers=self.headers, timeout=10)
-            # Forcer la lecture stricte en UTF-8
             html_text = response.content.decode('utf-8', errors='ignore')
             
             soup = BeautifulSoup(html_text, 'html.parser')
@@ -39,7 +38,8 @@ class CollecteurVeilleMaster:
             "source": "ArXiv",
             "categorie": "SCIENCE",
             "contenu": e.summary,
-            "lien": e.link
+            "lien": e.link,
+            "date": e.published[:10] 
         } for e in feed.entries]
 
     def executer_veille(self):
@@ -51,12 +51,17 @@ class CollecteurVeilleMaster:
                 feed = feedparser.parse(url)
                 for entry in feed.entries[:3]:
                     texte_complet = self.scraper_contenu_integral(entry.link)
+                    
+                    # Extraction de la date RSS (on essaie plusieurs formats courants)
+                    date_pub = entry.get('published', entry.get('updated', 'Date inconnue'))
+                    
                     resultats.append({
                         "titre": entry.title,
                         "source": nom,
                         "categorie": cat,
                         "contenu": texte_complet if len(texte_complet) > 200 else entry.description,
-                        "lien": entry.link
+                        "lien": entry.link,
+                        "date": date_pub 
                     })
-                    time.sleep(1) # Pause anti-bannissement
+                    time.sleep(1) 
         return resultats

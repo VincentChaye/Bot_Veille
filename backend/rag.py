@@ -1,5 +1,4 @@
 import os
-from urllib import response
 from llama_index.core import VectorStoreIndex, StorageContext, load_index_from_storage
 from llama_index.core import Settings
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
@@ -9,10 +8,7 @@ from llama_index.llms.ollama import Ollama
 Settings.embed_model = HuggingFaceEmbedding(model_name="sentence-transformers/all-MiniLM-L6-v2")
 Settings.llm = Ollama(model="mistral", request_timeout=120.0)
 
-
-
 DOSSIER_STOCKAGE = "./storage"
-
 
 def reinitialiser_stockage():
     """Supprime l'ancien dossier de stockage pour repartir à zéro."""
@@ -34,10 +30,8 @@ def interroger_base(query: str) -> str:
         
     storage_context = StorageContext.from_defaults(persist_dir=DOSSIER_STOCKAGE)
     index = load_index_from_storage(storage_context)
-    query_engine = index.as_query_engine (
-        similarity_top_k=2 # Il lit les 2 meilleurs articles avant de vous répondre
-	)  
+    query_engine = index.as_query_engine(
+        similarity_top_k=2
+    )
     response = query_engine.query(query)
     return str(response)
-
-	

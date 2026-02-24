@@ -22,9 +22,11 @@ def executer_pipeline_ingestion():
         doc = Document(
             text=texte_final,
             metadata={
-                "source": art['source'],
-                "url": art['lien'],
-                "categorie": art['categorie']
+                "source": art.get('source', 'Inconnue'),
+                "url": art.get('lien', '#'),
+                "categorie": art.get('categorie', 'Général'),
+                "titre": art.get('titre', 'Sans titre'),
+                "date": art.get('date', 'Date inconnue') 
             }
         )
         documents_enrichis.append(doc)
