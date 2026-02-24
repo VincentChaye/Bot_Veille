@@ -37,23 +37,24 @@ def interroger_base(query: str) -> str:
     return str(response)
 
 def rediger_article_ia(texte_brut: str) -> str:
-    """Demande à Ollama de réécrire le texte brut comme un journaliste expert."""
-    prompt = f"""Tu es un journaliste expert en cybersécurité. 
-    Ton objectif est de transformer le bulletin de sécurité brut ci-dessous en un article de veille clair, percutant et professionnel.
+    """Demande à Ollama de réécrire le texte brut comme un journaliste expert, en ANGLAIS."""
+    prompt = f"""You are an expert cybersecurity journalist. 
+    Your objective is to transform the raw security bulletin below into a clear, punchy, and professional threat intelligence article.
     
-    Règles :
-    1. Supprime tout le jargon administratif (numéro de référence, "Affaire suivie par", historique des versions).
-    2. Fais un résumé d'introduction accrocheur (2-3 phrases max).
-    3. Structure la suite avec ces titres exacts (en markdown) : 
-       ### Contexte et Risques
-       ### Systèmes affectés
-       ### Recommandations
-    4. Reste factuel, précis et garde les numéros CVE.
+    CRITICAL: Your entire output MUST be written in ENGLISH, even if the source text is in French or another language.
     
-    Texte brut à transformer :
-    {texte_brut[:2000]} # On limite un peu la taille pour que l'IA réponde vite
+    Rules:
+    1. Remove all administrative jargon (reference numbers, version history, etc.).
+    2. Write a catchy introductory summary (2-3 sentences max).
+    3. Structure the rest using exactly these markdown titles: 
+       ### Context and Risks
+       ### Affected Systems
+       ### Recommendations
+    4. Keep it factual, precise, and preserve all CVE numbers.
+    
+    Raw text to transform:
+    {texte_brut[:2000]}
     """
     
-    # On demande à Ollama de générer le texte
     response = Settings.llm.complete(prompt)
     return str(response)

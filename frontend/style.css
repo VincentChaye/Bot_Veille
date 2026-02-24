@@ -32,3 +32,26 @@ body {
 ::-webkit-scrollbar-track { background: #0f172a; }
 ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
 ::-webkit-scrollbar-thumb:hover { background: #38bdf8; }
+
+/* --- HACK VISUEL GOOGLE TRANSLATE --- */
+.goog-te-banner-frame.skiptranslate { display: none !important; } 
+body { top: 0px !important; }
+#goog-gt-tt { display: none !important; }
+.goog-te-gadget img, .goog-logo-link, .goog-te-gadget span { display: none !important; }
+.goog-te-gadget { color: transparent !important; font-size: 0 !important; margin: 0 !important; }
+
+.goog-te-combo {
+    color: #cbd5e1 !important; /* Équivalent à text-slate-300 */
+    background-color: transparent !important;
+    border: none !important;
+    padding: 0.25rem 0.5rem !important;
+    font-size: 0.875rem !important;
+    outline: none !important;
+    cursor: pointer;
+    margin: 0 !important;
+}
+
+.goog-te-combo option {
+    background-color: #0f172a !important; /* Équivalent à bg-slate-900 */
+    color: white !important;
+}
