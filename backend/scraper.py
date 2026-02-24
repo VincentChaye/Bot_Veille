@@ -20,7 +20,10 @@ class CollecteurVeilleMaster:
     def scraper_contenu_integral(self, url):
         try:
             response = requests.get(url, headers=self.headers, timeout=10)
-            soup = BeautifulSoup(response.text, 'html.parser')
+            # Forcer la lecture stricte en UTF-8
+            html_text = response.content.decode('utf-8', errors='ignore')
+            
+            soup = BeautifulSoup(html_text, 'html.parser')
             for element in soup(['nav', 'footer', 'script', 'style', 'header']):
                 element.decompose()
             corps = soup.find('article') or soup.find('main') or soup.body

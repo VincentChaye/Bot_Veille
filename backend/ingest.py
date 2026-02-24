@@ -1,9 +1,10 @@
 from scraper import CollecteurVeilleMaster
 from ner import extraire_entites_liste
-from rag import sauvegarder_documents
+from rag import sauvegarder_documents, reinitialiser_stockage
 from llama_index.core import Document
 
 def executer_pipeline_ingestion():
+    reinitialiser_stockage()  # ajout pour oplus tard, faire un systeme de articles enregistrer si l'utilisateur est intéressé
     bot = CollecteurVeilleMaster()
     print("Démarrage de la collecte de veille...")
     articles = bot.executer_veille()
