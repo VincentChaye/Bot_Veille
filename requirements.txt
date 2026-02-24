@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+pydantic
+spacy
+feedparser
+requests
+beautifulsoup4
+llama-index
+mcp
+llama-index-embeddings-huggingface
