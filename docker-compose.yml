@@ -1,0 +1,20 @@
+services:
+  backend:
+    image: cyberwatch_backend  # On utilise l'image que tu as build manuellement
+    container_name: cyberwatch_backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/storage:/app/storage
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+
+  frontend:
+    image: cyberwatch_frontend 
+    container_name: cyberwatch_frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    restart: unless-stopped

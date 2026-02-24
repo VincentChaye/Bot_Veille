@@ -6,6 +6,5 @@ feedparser
 requests
 beautifulsoup4
 llama-index
-mcp
 llama-index-embeddings-huggingface
 llama-index-llms-ollama

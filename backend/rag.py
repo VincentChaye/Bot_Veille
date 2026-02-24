@@ -6,15 +6,24 @@ import shutil
 from llama_index.llms.ollama import Ollama
 
 Settings.embed_model = HuggingFaceEmbedding(model_name="sentence-transformers/all-MiniLM-L6-v2")
-Settings.llm = Ollama(model="mistral", request_timeout=120.0)
+Settings.llm = Ollama(model="mistral", request_timeout=120.0, base_url="http://host.docker.internal:11434")
 
 DOSSIER_STOCKAGE = "./storage"
 
 def reinitialiser_stockage():
-    """Supprime l'ancien dossier de stockage pour repartir à zéro."""
+    DOSSIER_STOCKAGE = './storage' 
     if os.path.exists(DOSSIER_STOCKAGE):
-        shutil.rmtree(DOSSIER_STOCKAGE)
-        print(f"Ancienne base de données '{DOSSIER_STOCKAGE}' supprimée.")
+        for filename in os.listdir(DOSSIER_STOCKAGE):
+            file_path = os.path.join(DOSSIER_STOCKAGE, filename)
+            try:
+                if os.path.isfile(file_path) or os.path.islink(file_path):
+                    os.unlink(file_path) # Supprime les fichiers et liens
+                elif os.path.isdir(file_path):
+                    shutil.rmtree(file_path) # Supprime les sous-dossiers
+            except Exception as e:
+                print(f"Impossible de supprimer {file_path}. Raison : {e}")
+    else:
+        os.makedirs(DOSSIER_STOCKAGE)
 
 def sauvegarder_documents(documents):
     """Sauvegarde une liste de documents LlamaIndex dans la base vectorielle."""
