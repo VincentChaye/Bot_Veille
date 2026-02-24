@@ -35,3 +35,25 @@ def interroger_base(query: str) -> str:
     )
     response = query_engine.query(query)
     return str(response)
+
+def rediger_article_ia(texte_brut: str) -> str:
+    """Demande à Ollama de réécrire le texte brut comme un journaliste expert."""
+    prompt = f"""Tu es un journaliste expert en cybersécurité. 
+    Ton objectif est de transformer le bulletin de sécurité brut ci-dessous en un article de veille clair, percutant et professionnel.
+    
+    Règles :
+    1. Supprime tout le jargon administratif (numéro de référence, "Affaire suivie par", historique des versions).
+    2. Fais un résumé d'introduction accrocheur (2-3 phrases max).
+    3. Structure la suite avec ces titres exacts (en markdown) : 
+       ### Contexte et Risques
+       ### Systèmes affectés
+       ### Recommandations
+    4. Reste factuel, précis et garde les numéros CVE.
+    
+    Texte brut à transformer :
+    {texte_brut[:2000]} # On limite un peu la taille pour que l'IA réponde vite
+    """
+    
+    # On demande à Ollama de générer le texte
+    response = Settings.llm.complete(prompt)
+    return str(response)
