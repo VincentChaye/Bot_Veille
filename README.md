@@ -75,14 +75,22 @@ const CONFIG = {
 ```
 
 ### 5. Lancer l'application
-Construisez et démarrez les conteneurs avec Docker Compose :
+Pour éviter les bugs de construction liés à Docker Desktop sur certains systèmes Windows, nous allons construire les images manuellement avant de lancer l'orchestrateur.
 
+1. Construisez l'image du Backend :
 ```bash
-docker compose up --build -d
+docker build -t cyberwatch_backend ./backend
 ```
-*(Note pour Windows : préférez utiliser l'invite de commande standard `cmd` plutôt que PowerShell si vous rencontrez des erreurs).*
 
----
+2. Construisez l'image du Frontend :
+```bash
+docker build -t cyberwatch_frontend ./frontend
+```
+
+3. Démarrez les conteneurs :
+```bash
+docker compose up -d
+```
 
 ## 📖 Utilisation
 
