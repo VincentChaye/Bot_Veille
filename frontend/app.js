@@ -1,4 +1,4 @@
-const API_URL = "http://127.0.0.1:8000";
+fetch(`${CONFIG.API_URL}/articles`)
 let allArticles = [];
 
 // --- FONCTIONS UTILITAIRES ---
@@ -32,7 +32,7 @@ function detecterNotionsComplexes(texte) {
         for (const keyword of keywords) {
             const regexStr = keyword.endsWith('-') ? `\\b${keyword}` : `\\b${keyword}\\b`;
             const regex = new RegExp(regexStr, 'i');
-            
+
             if (regex.test(t)) {
                 tags.add(tag);
                 break; // on passe à la catégorie suivante
@@ -73,7 +73,7 @@ function formatMarkdown(text) {
 // --- LOGIQUE DE TRADUCTION INVISIBLE ---
 
 function loadGoogleTranslate() {
-    window.googleTranslateElementInit = function() {
+    window.googleTranslateElementInit = function () {
         new google.translate.TranslateElement({
             pageLanguage: 'en',
             autoDisplay: false, // Empêche Google d'afficher des popups
@@ -86,7 +86,7 @@ function loadGoogleTranslate() {
 }
 
 // La fonction magique qui relie notre beau menu au widget moche de Google
-window.changeLanguage = function(langCode) {
+window.changeLanguage = function (langCode) {
     const select = document.querySelector('.goog-te-combo');
     if (select) {
         select.value = langCode;
@@ -101,19 +101,18 @@ const initApp = async () => {
     app.innerHTML = `
         <div id="google_translate_element_hidden" style="display:none;"></div>
 
-        <header class="p-6 border-b border-white/10 flex justify-between items-center glass sticky top-0 z-50 flex-wrap gap-4">
-            <div class="flex items-center gap-3 cursor-pointer" onclick="renderListView()">
+        <header class="p-4 md:p-6 border-b border-white/10 flex flex-col md:flex-row justify-between items-center glass sticky top-0 z-50 gap-4">
+            <div class="flex items-center gap-3 cursor-pointer w-full md:w-auto justify-start" onclick="renderListView()">
                 <div class="bg-sky-500 p-2 rounded-lg shadow-lg">
                     <i class="fas fa-shield-alt text-white"></i>
                 </div>
                 <h1 class="text-xl font-bold tracking-tight">Cyber<span class="text-sky-400">Watch</span></h1>
             </div>
             
-            <div class="flex items-center gap-4">
-                
-                <div class="flex items-center gap-2 bg-slate-900 border border-white/10 rounded-lg px-3 py-1.5 hover:border-sky-500/50 transition-colors shadow-inner">
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
+                <div class="flex items-center gap-2 bg-slate-900 border border-white/10 rounded-lg px-3 py-2 hover:border-sky-500/50 transition-colors shadow-inner w-full sm:w-auto">
                     <i class="fas fa-language text-sky-500"></i>
-                    <select onchange="changeLanguage(this.value)" class="bg-transparent text-slate-300 text-sm font-medium focus:outline-none cursor-pointer appearance-none pr-4">
+                    <select onchange="changeLanguage(this.value)" class="bg-transparent text-slate-300 text-sm font-medium focus:outline-none cursor-pointer appearance-none pr-4 w-full">
                         <option value="en" class="bg-slate-900 text-white">🇺🇸 English</option>
                         <option value="fr" class="bg-slate-900 text-white">🇫🇷 Français</option>
                         <option value="es" class="bg-slate-900 text-white">🇪🇸 Español</option>
@@ -121,15 +120,15 @@ const initApp = async () => {
                     </select>
                 </div>
                 
-                <div class="relative">
+                <div class="relative w-full sm:w-auto">
                     <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
-                    <input type="text" id="mainSearch" placeholder="Filter articles..." class="bg-slate-900 border border-white/10 rounded-lg pl-8 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-sky-500 transition-all w-64 placeholder-slate-500">
+                    <input type="text" id="mainSearch" placeholder="Filter articles..." class="bg-slate-900 border border-white/10 rounded-lg pl-8 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-sky-500 transition-all w-full sm:w-64 md:w-64 placeholder-slate-500">
                 </div>
             </div>
         </header>
-        <div id="mainContent" class="max-w-5xl mx-auto p-6"></div>
+        <div id="mainContent" class="max-w-5xl mx-auto p-4 md:p-6"></div>
     `;
-    
+
     loadGoogleTranslate();
     await fetchArticles();
     renderListView();
@@ -137,9 +136,10 @@ const initApp = async () => {
 
 async function fetchArticles() {
     try {
-        const res = await fetch(`${API_URL}/articles`);
+        // Ajoute bien CONFIG. devant API_URL
+        const res = await fetch(`${CONFIG.API_URL}/articles`);
         allArticles = await res.json();
-    } catch (e) { 
+    } catch (e) {
         console.error("API Error", e);
     }
 }
@@ -152,21 +152,21 @@ function renderListView() {
     }
 
     container.innerHTML = `
-        <div class="flex items-center justify-between mb-8">
-            <h2 class="text-2xl font-bold flex items-center gap-3 text-white">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6 md:mb-8">
+            <h2 class="text-xl md:text-2xl font-bold flex items-center gap-3 text-white">
                 <i class="fas fa-layer-group text-sky-500"></i> Intelligence Feed
             </h2>
             <span class="text-xs text-slate-500 font-mono">${allArticles.length} articles loaded</span>
         </div>
         <div class="grid gap-4">
             ${allArticles.map(art => `
-                <div onclick="renderDetailView('${art.id}')" class="glass p-5 rounded-xl cursor-pointer border border-white/5 hover:border-sky-500/40 transition-all group">
-                    <div class="flex justify-between items-center mb-2">
-                        <span class="text-[10px] font-black text-sky-500 uppercase tracking-widest">${art.source}</span>
-                        <span class="text-[10px] text-slate-500 font-mono">${formatSmartDate(art.date)}</span>
+                <div onclick="renderDetailView('${art.id}')" class="glass p-4 md:p-5 rounded-xl cursor-pointer border border-white/5 hover:border-sky-500/40 transition-all group">
+                    <div class="flex justify-between items-start md:items-center mb-3 gap-2 flex-col md:flex-row">
+                        <span class="text-[9px] md:text-[10px] font-black text-sky-500 uppercase tracking-widest bg-sky-500/10 px-2 py-1 rounded inline-block">${art.source}</span>
+                        <span class="text-[10px] text-slate-500 font-mono shrink-0">${formatSmartDate(art.date)}</span>
                     </div>
-                    <h3 class="text-lg font-bold group-hover:text-sky-400 transition-colors mb-2">${art.titre}</h3>
-                    <p class="text-slate-400 text-xs leading-relaxed line-clamp-2">${art.resume}</p>
+                    <h3 class="text-base md:text-lg font-bold group-hover:text-sky-400 transition-colors mb-2 leading-snug">${art.titre}</h3>
+                    <p class="text-slate-400 text-xs md:text-sm leading-relaxed line-clamp-2">${art.resume}</p>
                 </div>
             `).join('')}
         </div>
@@ -178,52 +178,52 @@ function renderDetailView(id) {
     if (!art) return;
 
     const notions = detecterNotionsComplexes(art.contenu + art.titre);
-    
+
     const entitesPart = art.contenu.match(/ENTITÉS:(.*?)CONTENU:/s)?.[1] || "Analysis in progress...";
     const corpsPur = art.contenu.split("CONTENU:")[1] || art.contenu;
 
     const container = document.getElementById('mainContent');
     container.innerHTML = `
-        <button onclick="renderListView()" class="mb-8 text-slate-500 hover:text-sky-400 transition-colors flex items-center gap-2 text-sm font-bold uppercase tracking-tighter">
+        <button onclick="renderListView()" class="mb-6 md:mb-8 text-slate-500 hover:text-sky-400 transition-colors flex items-center gap-2 text-sm font-bold uppercase tracking-tighter bg-slate-900/50 w-fit px-4 py-2 rounded-lg">
             <i class="fas fa-chevron-left"></i> Back to feed
         </button>
         
-        <article class="glass rounded-3xl overflow-hidden animate-fade-in border border-white/10 shadow-2xl">
-            <header class="p-8 lg:p-12 bg-gradient-to-br from-slate-900 to-sky-900/20 border-b border-white/5">
-                <div class="flex items-center gap-4 text-xs font-bold mb-6">
-                    <span class="bg-sky-500 text-white px-3 py-1 rounded">${art.source}</span>
+        <article class="glass rounded-2xl md:rounded-3xl overflow-hidden animate-fade-in border border-white/10 shadow-2xl">
+            <header class="p-6 md:p-8 lg:p-12 bg-gradient-to-br from-slate-900 to-sky-900/20 border-b border-white/5">
+                <div class="flex flex-wrap items-center gap-3 text-xs font-bold mb-4 md:mb-6">
+                    <span class="bg-sky-500 text-white px-2 py-1 md:px-3 md:py-1 rounded">${art.source}</span>
                     <span class="text-slate-400">${formatSmartDate(art.date)}</span>
                 </div>
-                <h1 class="text-3xl lg:text-5xl font-black text-white mb-8 leading-tight">${art.titre}</h1>
-                <a href="${art.url}" target="_blank" class="inline-flex items-center gap-2 text-sky-400 hover:text-sky-300 text-xs font-bold bg-white/5 px-4 py-2 rounded-full border border-white/10 transition-all">
+                <h1 class="text-2xl md:text-3xl lg:text-5xl font-black text-white mb-6 md:mb-8 leading-tight">${art.titre}</h1>
+                <a href="${art.url}" target="_blank" class="inline-flex items-center justify-center gap-2 text-sky-400 hover:text-sky-300 text-xs font-bold bg-white/5 px-4 py-3 md:py-2 rounded-lg md:rounded-full border border-white/10 transition-all w-full md:w-auto">
                     SOURCE LINK <i class="fas fa-external-link-alt"></i>
                 </a>
             </header>
 
-            <div class="p-8 lg:p-12 space-y-12">
-                <section class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <div class="p-6 md:p-8 lg:p-12 space-y-8 md:space-y-12">
+                <section class="grid grid-cols-1 lg:grid-cols-4 gap-4 md:gap-6">
                     <div class="lg:col-span-1">
                         <h3 class="text-[10px] font-black text-sky-500 uppercase tracking-widest mb-2">NER Extraction</h3>
-                        <p class="text-xs text-slate-500 leading-relaxed italic">Elements identified automatically by spaCy.</p>
+                        <p class="text-[10px] md:text-xs text-slate-500 leading-relaxed italic">Elements identified automatically by spaCy.</p>
                     </div>
-                    <div class="lg:col-span-3 bg-slate-900/80 p-6 rounded-2xl border border-white/5 text-sm text-sky-200/70 font-mono">
+                    <div class="lg:col-span-3 bg-slate-900/80 p-4 md:p-6 rounded-xl md:rounded-2xl border border-white/5 text-xs md:text-sm text-sky-200/70 font-mono overflow-x-auto">
                         ${entitesPart}
                     </div>
                 </section>
 
-                <section class="space-y-6">
+                <section class="space-y-4 md:space-y-6">
                     <h3 class="text-[10px] font-black text-sky-500 uppercase tracking-widest border-b border-white/10 pb-2">Report Body</h3>
-                    <div class="text-slate-300 leading-relaxed text-lg font-light whitespace-pre-wrap">
+                    <div class="text-slate-300 leading-relaxed text-sm md:text-lg font-light whitespace-pre-wrap">
                         ${formatMarkdown(corpsPur.trim())}
                     </div>
                 </section>
             </div>
 
-            <footer class="p-8 lg:p-12 bg-black/20 border-t border-white/5">
-                <div class="flex flex-col gap-6">
+            <footer class="p-6 md:p-8 lg:p-12 bg-black/20 border-t border-white/5">
+                <div class="flex flex-col gap-4 md:gap-6">
                     <h4 class="text-[10px] font-black uppercase tracking-widest text-slate-500">Contextual Intelligence</h4>
                     <div class="flex flex-wrap gap-2">
-                        ${notions.map(n => `<span class="px-4 py-2 rounded-lg text-[10px] font-black border uppercase tracking-wider transition-all ${getStyleNotion(n)}">${n}</span>`).join('')}
+                        ${notions.map(n => `<span class="px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-[9px] md:text-[10px] font-black border uppercase tracking-wider transition-all ${getStyleNotion(n)}">${n}</span>`).join('')}
                     </div>
                 </div>
             </footer>
